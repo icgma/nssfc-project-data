@@ -253,7 +253,7 @@ document.getElementById('authInput').addEventListener('keydown', e => {
 
 // Check session
 if (sessionStorage.getItem('nssfc_auth') === '1') {
-  showMain();
+  document.addEventListener('DOMContentLoaded', () => showMain());
 }
 </script>
 
