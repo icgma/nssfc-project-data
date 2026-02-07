@@ -1,0 +1,285 @@
+{
+  "total": 96033,
+  "disciplines": {
+    "未分类": {
+      "file": "tfidf_d00.json",
+      "count": 17174,
+      "size": 3165700
+    },
+    "中国文学": {
+      "file": "tfidf_d01.json",
+      "count": 6299,
+      "size": 1033283
+    },
+    "法学": {
+      "file": "tfidf_d02.json",
+      "count": 6152,
+      "size": 1140889
+    },
+    "管理学": {
+      "file": "tfidf_d03.json",
+      "count": 5695,
+      "size": 1363677
+    },
+    "语言学": {
+      "file": "tfidf_d04.json",
+      "count": 5388,
+      "size": 1007186
+    },
+    "中国历史": {
+      "file": "tfidf_d05.json",
+      "count": 5292,
+      "size": 905723
+    },
+    "哲学": {
+      "file": "tfidf_d06.json",
+      "count": 5249,
+      "size": 883839
+    },
+    "社会学": {
+      "file": "tfidf_d07.json",
+      "count": 5074,
+      "size": 1084020
+    },
+    "应用经济": {
+      "file": "tfidf_d08.json",
+      "count": 5003,
+      "size": 1078564
+    },
+    "民族学": {
+      "file": "tfidf_d09.json",
+      "count": 3030,
+      "size": 682985
+    },
+    "政治学": {
+      "file": "tfidf_d10.json",
+      "count": 2933,
+      "size": 612132
+    },
+    "理论经济": {
+      "file": "tfidf_d11.json",
+      "count": 2897,
+      "size": 624045
+    },
+    "应用经济学": {
+      "file": "tfidf_d12.json",
+      "count": 2655,
+      "size": 654672
+    },
+    "新闻学与传播学": {
+      "file": "tfidf_d13.json",
+      "count": 2513,
+      "size": 521888
+    },
+    "体育学": {
+      "file": "tfidf_d14.json",
+      "count": 2258,
+      "size": 502148
+    },
+    "外国文学": {
+      "file": "tfidf_d15.json",
+      "count": 2133,
+      "size": 357335
+    },
+    "国际问题研究": {
+      "file": "tfidf_d16.json",
+      "count": 1912,
+      "size": 404851
+    },
+    "图书馆·情报与文献学": {
+      "file": "tfidf_d17.json",
+      "count": 1775,
+      "size": 368235
+    },
+    "图书馆、情报与文献学": {
+      "file": "tfidf_d18.json",
+      "count": 1775,
+      "size": 368235
+    },
+    "世界历史": {
+      "file": "tfidf_d19.json",
+      "count": 1723,
+      "size": 308863
+    },
+    "宗教学": {
+      "file": "tfidf_d20.json",
+      "count": 1654,
+      "size": 288324
+    },
+    "理论经济学": {
+      "file": "tfidf_d21.json",
+      "count": 1376,
+      "size": 332368
+    },
+    "统计学": {
+      "file": "tfidf_d22.json",
+      "count": 1243,
+      "size": 279215
+    },
+    "考古学": {
+      "file": "tfidf_d23.json",
+      "count": 1209,
+      "size": 219644
+    },
+    "民族问题研究": {
+      "file": "tfidf_d24.json",
+      "count": 1090,
+      "size": 214361
+    },
+    "人口学": {
+      "file": "tfidf_d25.json",
+      "count": 988,
+      "size": 222476
+    },
+    "艺术学": {
+      "file": "tfidf_d26.json",
+      "count": 548,
+      "size": 89369
+    },
+    "区域国别学和国际问题研究": {
+      "file": "tfidf_d27.json",
+      "count": 500,
+      "size": 110718
+    },
+    "教育学": {
+      "file": "tfidf_d28.json",
+      "count": 292,
+      "size": 55775
+    },
+    "军事学": {
+      "file": "tfidf_d29.json",
+      "count": 83,
+      "size": 13201
+    },
+    "跨学科": {
+      "file": "tfidf_d30.json",
+      "count": 37,
+      "size": 7581
+    },
+    "马列科社": {
+      "file": "tfidf_d31.json",
+      "count": 17,
+      "size": 3100
+    },
+    "新闻学": {
+      "file": "tfidf_d32.json",
+      "count": 10,
+      "size": 1788
+    },
+    "其他": {
+      "file": "tfidf_d33.json",
+      "count": 7,
+      "size": 835
+    },
+    "党史党建": {
+      "file": "tfidf_d34.json",
+      "count": 5,
+      "size": 811
+    },
+    "图书馆、情报与档案学": {
+      "file": "tfidf_d35.json",
+      "count": 5,
+      "size": 979
+    },
+    "系列丛书": {
+      "file": "tfidf_d36.json",
+      "count": 5,
+      "size": 803
+    },
+    "国际问题": {
+      "file": "tfidf_d37.json",
+      "count": 3,
+      "size": 401
+    },
+    "民族问题\n研究": {
+      "file": "tfidf_d38.json",
+      "count": 3,
+      "size": 323
+    },
+    "马列.科社": {
+      "file": "tfidf_d39.json",
+      "count": 3,
+      "size": 552
+    },
+    "马列·科社": {
+      "file": "tfidf_d40.json",
+      "count": 3,
+      "size": 552
+    },
+    "马列•科社": {
+      "file": "tfidf_d41.json",
+      "count": 3,
+      "size": 552
+    },
+    "党史·党建": {
+      "file": "tfidf_d42.json",
+      "count": 2,
+      "size": 295
+    },
+    "党史•党建": {
+      "file": "tfidf_d43.json",
+      "count": 2,
+      "size": 295
+    },
+    "图书·情报与文献": {
+      "file": "tfidf_d44.json",
+      "count": 2,
+      "size": 259
+    },
+    "新闻学与\n传播学": {
+      "file": "tfidf_d45.json",
+      "count": 2,
+      "size": 363
+    },
+    "民族问题": {
+      "file": "tfidf_d46.json",
+      "count": 2,
+      "size": 294
+    },
+    "中国历史、": {
+      "file": "tfidf_d47.json",
+      "count": 1,
+      "size": 149
+    },
+    "产业经济、生态学、系统科学、管理": {
+      "file": "tfidf_d48.json",
+      "count": 1,
+      "size": 195
+    },
+    "国民中华民族精神认同现状调查": {
+      "file": "tfidf_d49.json",
+      "count": 1,
+      "size": 164
+    },
+    "图书情报": {
+      "file": "tfidf_d50.json",
+      "count": 1,
+      "size": 241
+    },
+    "应用经济、管理学、资源环境科学、": {
+      "file": "tfidf_d51.json",
+      "count": 1,
+      "size": 228
+    },
+    "新闻与传播学": {
+      "file": "tfidf_d52.json",
+      "count": 1,
+      "size": 193
+    },
+    "新闻传播学": {
+      "file": "tfidf_d53.json",
+      "count": 1,
+      "size": 175
+    },
+    "电气工程、管理学、产业经济、能源": {
+      "file": "tfidf_d54.json",
+      "count": 1,
+      "size": 285
+    },
+    "综合研究": {
+      "file": "tfidf_d55.json",
+      "count": 1,
+      "size": 138
+    }
+  }
+}

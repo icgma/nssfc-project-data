@@ -64,6 +64,35 @@ tr:hover td{background:#f8fafc}
 .auth-box .auth-btn{width:100%;margin-top:.8rem;padding:.6rem;background:#2a4a7f;color:#fff;border:none;border-radius:6px;font-size:.9rem;font-weight:600;cursor:pointer;transition:background .2s}
 .auth-box .auth-btn:hover{background:#1a365d}
 .auth-box .auth-err{color:#dc2626;font-size:.8rem;margin-top:.6rem;min-height:1.2rem}
+/* Tabs */
+.tabs{display:flex;gap:0;margin-bottom:1rem}
+.tab-btn{padding:.6rem 1.5rem;border:none;background:#e2e8f0;color:#555;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .2s;border-radius:8px 8px 0 0}
+.tab-btn:hover{background:#cbd5e0}
+.tab-btn.active{background:#2a4a7f;color:#fff}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+/* Recommend panel */
+.rec-box{background:#fff;border-radius:10px;padding:1.5rem;margin-bottom:1rem;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.rec-box h3{font-size:1rem;font-weight:600;color:#1a365d;margin-bottom:.8rem}
+.rec-input-row{display:flex;gap:.8rem;flex-wrap:wrap;align-items:flex-end;margin-bottom:1rem}
+.rec-input-row .filter-group{flex:2;min-width:300px}
+.rec-input-row .filter-group.disc-select{flex:1;min-width:200px}
+.rec-input-row textarea{width:100%;padding:.5rem .7rem;border:1px solid #ddd;border-radius:6px;font-size:.85rem;resize:vertical;min-height:2.5rem;font-family:inherit}
+.rec-results{margin-top:1rem}
+.rec-card{background:#fff;border:1px solid #eee;border-radius:8px;padding:1rem;margin-bottom:.6rem;transition:border-color .2s}
+.rec-card:hover{border-color:#2a4a7f}
+.rec-card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem}
+.rec-card-title{font-size:.9rem;font-weight:600;color:#1a365d}
+.rec-score{font-size:.8rem;font-weight:700;color:#fff;background:#2a4a7f;padding:.15rem .6rem;border-radius:12px}
+.rec-card-meta{font-size:.78rem;color:#888;display:flex;gap:1rem;flex-wrap:wrap}
+.rec-tokens{font-size:.78rem;color:#999;margin-top:.3rem}
+.rec-tokens span{background:#f0f4ff;color:#2a4a7f;padding:.1rem .4rem;border-radius:3px;margin-right:.3rem;font-size:.75rem}
+.disc-chips{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.8rem}
+.disc-chip{padding:.25rem .6rem;border-radius:16px;font-size:.78rem;cursor:pointer;border:1.5px solid #ddd;background:#fff;transition:all .15s;user-select:none}
+.disc-chip:hover{border-color:#2a4a7f;color:#2a4a7f}
+.disc-chip.selected{background:#2a4a7f;color:#fff;border-color:#2a4a7f}
+.rec-hint{font-size:.78rem;color:#999;margin-bottom:.5rem}
+.rec-status{font-size:.82rem;color:#666;padding:.5rem 0}
 </style>
 </head>
 <body>
@@ -93,54 +122,90 @@ tr:hover td{background:#f8fafc}
 </div>
 
 <div class="container">
-  <div class="filters">
-    <div class="filter-group">
-      <label>学科分类</label>
-      <select id="filterDisc"><option value="">全部学科</option></select>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('search')">数据查询</button>
+    <button class="tab-btn" onclick="switchTab('recommend')">标题推荐</button>
+  </div>
+
+  <!-- Tab 1: Search (original) -->
+  <div class="tab-panel active" id="tabSearch">
+    <div class="filters">
+      <div class="filter-group">
+        <label>学科分类</label>
+        <select id="filterDisc"><option value="">全部学科</option></select>
+      </div>
+      <div class="filter-group">
+        <label>项目类别</label>
+        <select id="filterCat"><option value="">全部类别</option></select>
+      </div>
+      <div class="filter-group">
+        <label>立项年份</label>
+        <select id="filterYear"><option value="">全部年份</option></select>
+      </div>
+      <div class="filter-group">
+        <label>关键词搜索</label>
+        <input type="text" id="searchInput" placeholder="项目名称 / 负责人 / 单位">
+      </div>
+      <div style="display:flex;gap:.5rem;align-items:flex-end">
+        <button class="btn btn-primary" onclick="applyFilters()">查询</button>
+        <button class="btn btn-secondary" onclick="resetFilters()">重置</button>
+      </div>
     </div>
-    <div class="filter-group">
-      <label>项目类别</label>
-      <select id="filterCat"><option value="">全部类别</option></select>
+
+    <div class="results-bar">
+      <span id="resultsInfo">加载中...</span>
+      <span id="exportInfo"></span>
     </div>
-    <div class="filter-group">
-      <label>立项年份</label>
-      <select id="filterYear"><option value="">全部年份</option></select>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th data-col="项目批准号" onclick="sortBy('项目批准号')">批准号 <span class="sort-icon">&#9650;</span></th>
+            <th data-col="项目类别" onclick="sortBy('项目类别')">类别 <span class="sort-icon">&#9650;</span></th>
+            <th data-col="学科分类" onclick="sortBy('学科分类')">学科 <span class="sort-icon">&#9650;</span></th>
+            <th data-col="项目名称" onclick="sortBy('项目名称')">项目名称 <span class="sort-icon">&#9650;</span></th>
+            <th data-col="项目负责人" onclick="sortBy('项目负责人')">负责人 <span class="sort-icon">&#9650;</span></th>
+            <th data-col="工作单位" onclick="sortBy('工作单位')">单位 <span class="sort-icon">&#9650;</span></th>
+            <th data-col="所在省区市" onclick="sortBy('所在省区市')">省区市 <span class="sort-icon">&#9650;</span></th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <tr><td colspan="7" class="loading"><div class="spinner"></div><br>正在加载数据...</td></tr>
+        </tbody>
+      </table>
     </div>
-    <div class="filter-group">
-      <label>关键词搜索</label>
-      <input type="text" id="searchInput" placeholder="项目名称 / 负责人 / 单位">
-    </div>
-    <div style="display:flex;gap:.5rem;align-items:flex-end">
-      <button class="btn btn-primary" onclick="applyFilters()">查询</button>
-      <button class="btn btn-secondary" onclick="resetFilters()">重置</button>
+
+    <div class="pagination" id="pagination"></div>
+  </div>
+
+  <!-- Tab 2: Title Recommendation -->
+  <div class="tab-panel" id="tabRecommend">
+    <div class="rec-box">
+      <h3>智能标题推荐</h3>
+      <p class="rec-hint">输入您的课题标题，系统将基于 TF-IDF 文本相似度从已立项课题中推荐最相关的标题。请先选择至少一个学科范围。</p>
+
+      <div style="margin-top:1rem">
+        <label style="font-size:.8rem;font-weight:600;color:#555;display:block;margin-bottom:.4rem">选择学科范围（可多选）</label>
+        <div class="disc-chips" id="recDiscChips"></div>
+      </div>
+
+      <div class="rec-input-row" style="margin-top:.8rem">
+        <div class="filter-group" style="flex:3;min-width:350px">
+          <label>输入课题标题</label>
+          <input type="text" id="recTitleInput" placeholder="例：生成式人工智能对国际传播格局的影响研究" style="font-size:.9rem;padding:.6rem .8rem">
+        </div>
+        <div style="display:flex;gap:.5rem;align-items:flex-end">
+          <button class="btn btn-primary" onclick="doRecommend()">推荐</button>
+          <button class="btn btn-secondary" onclick="clearRecommend()">清空</button>
+        </div>
+      </div>
+
+      <div class="rec-status" id="recStatus"></div>
+      <div class="rec-results" id="recResults"></div>
     </div>
   </div>
 
-  <div class="results-bar">
-    <span id="resultsInfo">加载中...</span>
-    <span id="exportInfo"></span>
-  </div>
-
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th data-col="项目批准号" onclick="sortBy('项目批准号')">批准号 <span class="sort-icon">&#9650;</span></th>
-          <th data-col="项目类别" onclick="sortBy('项目类别')">类别 <span class="sort-icon">&#9650;</span></th>
-          <th data-col="学科分类" onclick="sortBy('学科分类')">学科 <span class="sort-icon">&#9650;</span></th>
-          <th data-col="项目名称" onclick="sortBy('项目名称')">项目名称 <span class="sort-icon">&#9650;</span></th>
-          <th data-col="项目负责人" onclick="sortBy('项目负责人')">负责人 <span class="sort-icon">&#9650;</span></th>
-          <th data-col="工作单位" onclick="sortBy('工作单位')">单位 <span class="sort-icon">&#9650;</span></th>
-          <th data-col="所在省区市" onclick="sortBy('所在省区市')">省区市 <span class="sort-icon">&#9650;</span></th>
-        </tr>
-      </thead>
-      <tbody id="tableBody">
-        <tr><td colspan="7" class="loading"><div class="spinner"></div><br>正在加载数据...</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div class="pagination" id="pagination"></div>
 </div>
 
 <div class="footer">
@@ -189,6 +254,16 @@ if (sessionStorage.getItem('nssfc_auth') === '1') {
 </script>
 
 <script>
+// ===== Tab switching =====
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach((b, i) => {
+    b.classList.toggle('active', (tab === 'search' && i === 0) || (tab === 'recommend' && i === 1));
+  });
+  document.getElementById('tabSearch').classList.toggle('active', tab === 'search');
+  document.getElementById('tabRecommend').classList.toggle('active', tab === 'recommend');
+}
+
+// ===== Search Tab (original code) =====
 const PAGE_SIZE = 50;
 let indexData = null;
 let currentData = [];
@@ -297,7 +372,6 @@ async function applyFilters() {
   } else if (cat || year || keyword) {
     data = await loadAllData();
   } else {
-    // Default: load first discipline or all
     data = await loadAllData();
   }
 
@@ -406,17 +480,241 @@ function goPage(page) {
   document.querySelector('.table-wrap').scrollIntoView({ behavior: 'smooth' });
 }
 
-// Enter key triggers search
 document.getElementById('searchInput').addEventListener('keydown', e => {
   if (e.key === 'Enter') applyFilters();
 });
 
-// Init app after auth
-function initApp() {
-  loadIndex().then(() => {
-    document.getElementById('resultsInfo').textContent = `共 ${indexData.total.toLocaleString()} 条记录，请筛选查看`;
-    document.getElementById('tableBody').innerHTML = '<tr><td colspan="7" class="empty">请选择筛选条件后点击"查询"</td></tr>';
-  });
+// ===== Recommend Tab =====
+let tfidfVocab = null;       // { term: [index, idf], ... }
+let tfidfIndex = null;       // { disciplines: { name: { file, count, size } } }
+const tfidfDataCache = {};   // discipline -> array of title records
+
+let vocabMaxLen = 0;
+const vocabByLen = {};  // length -> Set of terms
+
+async function loadTfidfVocab() {
+  if (tfidfVocab) return;
+  const resp = await fetch('data/tfidf_vocab.json');
+  tfidfVocab = await resp.json();
+  // Build lookup sets grouped by term length for fast matching
+  for (const term of Object.keys(tfidfVocab)) {
+    const len = term.length;
+    if (len > vocabMaxLen) vocabMaxLen = len;
+    if (!vocabByLen[len]) vocabByLen[len] = new Set();
+    vocabByLen[len].add(term);
+  }
+}
+
+async function loadTfidfIndex() {
+  if (tfidfIndex) return;
+  const resp = await fetch('data/tfidf_index.json');
+  tfidfIndex = await resp.json();
+}
+
+async function loadTfidfDisc(discName) {
+  if (tfidfDataCache[discName]) return tfidfDataCache[discName];
+  const info = tfidfIndex.disciplines[discName];
+  if (!info) return [];
+  const resp = await fetch('data/' + info.file);
+  const data = await resp.json();
+  tfidfDataCache[discName] = data;
+  return data;
+}
+
+// Forward maximum matching segmentation using vocabulary as dictionary
+function segmentText(text) {
+  const tokens = [];
+  let i = 0;
+  while (i < text.length) {
+    let matched = false;
+    // Try longest match first (descending length)
+    const maxTry = Math.min(vocabMaxLen, text.length - i);
+    for (let len = maxTry; len >= 2; len--) {
+      const candidate = text.substring(i, i + len);
+      if (vocabByLen[len] && vocabByLen[len].has(candidate)) {
+        tokens.push(candidate);
+        i += len;
+        matched = true;
+        break;
+      }
+    }
+    if (!matched) {
+      i++;
+    }
+  }
+  return tokens;
+}
+
+// Build TF-IDF vector for query text
+function buildQueryVector(text) {
+  const tokens = segmentText(text);
+  // Count term frequency
+  const tf = {};
+  for (const t of tokens) {
+    tf[t] = (tf[t] || 0) + 1;
+  }
+  // Build TF-IDF vector
+  const vec = {};
+  let normSq = 0;
+  for (const [term, count] of Object.entries(tf)) {
+    if (!tfidfVocab[term]) continue;
+    const [idx, idfVal] = tfidfVocab[term];
+    const w = count * idfVal;
+    vec[String(idx)] = w;
+    normSq += w * w;
+  }
+  // L2 normalize
+  if (normSq > 0) {
+    const norm = Math.sqrt(normSq);
+    for (const k of Object.keys(vec)) {
+      vec[k] /= norm;
+    }
+  }
+  return { vec, tokens };
+}
+
+// Cosine similarity between two sparse vectors
+function cosineSim(vecA, vecB) {
+  let dot = 0;
+  for (const [k, v] of Object.entries(vecA)) {
+    if (vecB[k]) {
+      dot += v * vecB[k];
+    }
+  }
+  return dot; // already L2-normalized
+}
+
+// Selected disciplines for recommendation
+const selectedDiscs = new Set();
+
+function initRecDiscChips() {
+  const container = document.getElementById('recDiscChips');
+  if (!tfidfIndex) return;
+
+  const discs = Object.entries(tfidfIndex.disciplines)
+    .filter(([, info]) => info.count >= 5)
+    .sort((a, b) => b[1].count - a[1].count);
+
+  container.innerHTML = discs.map(([name, info]) => {
+    const sizeKB = Math.round(info.size / 1024);
+    return `<span class="disc-chip" data-disc="${escapeHtml(name)}" onclick="toggleRecDisc(this)" title="${info.count} 条记录, ${sizeKB}KB">${escapeHtml(name)} (${info.count})</span>`;
+  }).join('');
+}
+
+function toggleRecDisc(el) {
+  const disc = el.getAttribute('data-disc');
+  if (selectedDiscs.has(disc)) {
+    selectedDiscs.delete(disc);
+    el.classList.remove('selected');
+  } else {
+    selectedDiscs.add(disc);
+    el.classList.add('selected');
+  }
+}
+
+async function doRecommend() {
+  const title = document.getElementById('recTitleInput').value.trim();
+  const statusEl = document.getElementById('recStatus');
+  const resultsEl = document.getElementById('recResults');
+
+  if (!title) {
+    statusEl.textContent = '请输入课题标题';
+    resultsEl.innerHTML = '';
+    return;
+  }
+  if (selectedDiscs.size === 0) {
+    statusEl.textContent = '请至少选择一个学科范围';
+    resultsEl.innerHTML = '';
+    return;
+  }
+
+  statusEl.innerHTML = '<div class="spinner" style="width:20px;height:20px;border-width:2px;vertical-align:middle;margin-right:.5rem"></div>正在加载模型和计算相似度...';
+  resultsEl.innerHTML = '';
+
+  // Ensure vocab is loaded
+  await loadTfidfVocab();
+
+  // Build query vector
+  const { vec: queryVec, tokens: queryTokens } = buildQueryVector(title);
+
+  if (Object.keys(queryVec).length === 0) {
+    statusEl.textContent = '未能从标题中提取有效词汇，请尝试更详细的标题';
+    return;
+  }
+
+  // Load selected discipline data
+  const discNames = Array.from(selectedDiscs);
+  statusEl.innerHTML = `<div class="spinner" style="width:20px;height:20px;border-width:2px;vertical-align:middle;margin-right:.5rem"></div>正在加载 ${discNames.length} 个学科的数据...`;
+
+  const allTitles = [];
+  for (const disc of discNames) {
+    const data = await loadTfidfDisc(disc);
+    for (const item of data) {
+      allTitles.push({ ...item, d: disc });
+    }
+  }
+
+  statusEl.innerHTML = `<div class="spinner" style="width:20px;height:20px;border-width:2px;vertical-align:middle;margin-right:.5rem"></div>正在计算 ${allTitles.length.toLocaleString()} 个标题的相似度...`;
+
+  // Compute similarities (defer to avoid blocking UI)
+  await new Promise(r => setTimeout(r, 50));
+
+  const scored = [];
+  for (const item of allTitles) {
+    const sim = cosineSim(queryVec, item.v);
+    if (sim > 0.05) {
+      scored.push({ ...item, score: sim });
+    }
+  }
+
+  scored.sort((a, b) => b.score - a.score);
+  const topN = scored.slice(0, 50);
+
+  // Display results
+  statusEl.textContent = `在 ${allTitles.length.toLocaleString()} 个标题中找到 ${scored.length} 个相关结果，显示前 ${topN.length} 条`;
+
+  if (topN.length === 0) {
+    resultsEl.innerHTML = '<div class="empty">未找到相似标题，请尝试不同的表述或扩大学科范围</div>';
+    return;
+  }
+
+  // Show matched query tokens
+  const tokensHtml = `<div class="rec-tokens" style="margin-bottom:1rem">查询分词结果：${queryTokens.map(t => `<span>${escapeHtml(t)}</span>`).join('')}</div>`;
+
+  resultsEl.innerHTML = tokensHtml + topN.map((item, i) => `
+    <div class="rec-card">
+      <div class="rec-card-header">
+        <div class="rec-card-title">${i + 1}. ${escapeHtml(item.t)}</div>
+        <div class="rec-score">${(item.score * 100).toFixed(1)}%</div>
+      </div>
+      <div class="rec-card-meta">
+        <span>${getCategoryTag(item.c)}</span>
+        <span>${escapeHtml(item.d)}</span>
+        <span>${item.y || '-'}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function clearRecommend() {
+  document.getElementById('recTitleInput').value = '';
+  document.getElementById('recStatus').textContent = '';
+  document.getElementById('recResults').innerHTML = '';
+}
+
+document.getElementById('recTitleInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doRecommend();
+});
+
+// ===== Init =====
+async function initApp() {
+  await loadIndex();
+  document.getElementById('resultsInfo').textContent = `共 ${indexData.total.toLocaleString()} 条记录，请筛选查看`;
+  document.getElementById('tableBody').innerHTML = '<tr><td colspan="7" class="empty">请选择筛选条件后点击"查询"</td></tr>';
+
+  // Init recommend tab
+  await loadTfidfIndex();
+  initRecDiscChips();
 }
 </script>
 
