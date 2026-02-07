@@ -124,7 +124,7 @@ tr:hover td{background:#f8fafc}
 <div class="container">
   <div class="tabs">
     <button class="tab-btn active" onclick="switchTab('search')">数据查询</button>
-    <button class="tab-btn" onclick="switchTab('recommend')">标题推荐</button>
+    <button class="tab-btn" onclick="switchTab('recommend')">标题撞车检索</button>
   </div>
 
   <!-- Tab 1: Search (original) -->
@@ -179,11 +179,11 @@ tr:hover td{background:#f8fafc}
     <div class="pagination" id="pagination"></div>
   </div>
 
-  <!-- Tab 2: Title Recommendation -->
+  <!-- Tab 2: Title Collision Check -->
   <div class="tab-panel" id="tabRecommend">
     <div class="rec-box">
-      <h3>智能标题推荐</h3>
-      <p class="rec-hint">输入您的课题标题，系统将基于 TF-IDF 文本相似度从已立项课题中推荐最相关的标题。请先选择至少一个学科范围。</p>
+      <h3>标题撞车检索</h3>
+      <p class="rec-hint">输入您的课题标题，系统将基于 TF-IDF 文本相似度从已立项课题中检索最相似的标题，帮助您排查选题是否与已有项目撞车。请先选择至少一个学科范围。</p>
 
       <div style="margin-top:1rem">
         <label style="font-size:.8rem;font-weight:600;color:#555;display:block;margin-bottom:.4rem">选择学科范围（可多选）</label>
@@ -196,7 +196,7 @@ tr:hover td{background:#f8fafc}
           <input type="text" id="recTitleInput" placeholder="例：生成式人工智能对国际传播格局的影响研究" style="font-size:.9rem;padding:.6rem .8rem">
         </div>
         <div style="display:flex;gap:.5rem;align-items:flex-end">
-          <button class="btn btn-primary" onclick="doRecommend()">推荐</button>
+          <button class="btn btn-primary" onclick="doRecommend()">检索</button>
           <button class="btn btn-secondary" onclick="clearRecommend()">清空</button>
         </div>
       </div>
@@ -628,7 +628,7 @@ async function doRecommend() {
     return;
   }
 
-  statusEl.innerHTML = '<div class="spinner" style="width:20px;height:20px;border-width:2px;vertical-align:middle;margin-right:.5rem"></div>正在加载模型和计算相似度...';
+  statusEl.innerHTML = '<div class="spinner" style="width:20px;height:20px;border-width:2px;vertical-align:middle;margin-right:.5rem"></div>正在加载模型和检索相似课题...';
   resultsEl.innerHTML = '';
 
   // Ensure vocab is loaded
@@ -654,7 +654,7 @@ async function doRecommend() {
     }
   }
 
-  statusEl.innerHTML = `<div class="spinner" style="width:20px;height:20px;border-width:2px;vertical-align:middle;margin-right:.5rem"></div>正在计算 ${allTitles.length.toLocaleString()} 个标题的相似度...`;
+  statusEl.innerHTML = `<div class="spinner" style="width:20px;height:20px;border-width:2px;vertical-align:middle;margin-right:.5rem"></div>正在检索 ${allTitles.length.toLocaleString()} 个已立项课题...`;
 
   // Compute similarities (defer to avoid blocking UI)
   await new Promise(r => setTimeout(r, 50));
@@ -671,10 +671,10 @@ async function doRecommend() {
   const topN = scored.slice(0, 50);
 
   // Display results
-  statusEl.textContent = `在 ${allTitles.length.toLocaleString()} 个标题中找到 ${scored.length} 个相关结果，显示前 ${topN.length} 条`;
+  statusEl.textContent = `在 ${allTitles.length.toLocaleString()} 个已立项课题中找到 ${scored.length} 个相似项，显示前 ${topN.length} 条`;
 
   if (topN.length === 0) {
-    resultsEl.innerHTML = '<div class="empty">未找到相似标题，请尝试不同的表述或扩大学科范围</div>';
+    resultsEl.innerHTML = '<div class="empty">未找到相似课题，您的选题与已立项课题重复度较低</div>';
     return;
   }
 
