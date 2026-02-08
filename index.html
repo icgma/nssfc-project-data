@@ -134,7 +134,7 @@ tr:hover td{background:#f8fafc}
     <div class="filters">
       <div class="filter-group">
         <label>学科分类</label>
-        <select id="filterDisc"><option value="">全部学科</option></select>
+        <select id="filterDisc"><option value="">-- 请选择学科 --</option></select>
       </div>
       <div class="filter-group">
         <label>项目类别</label>
@@ -276,6 +276,7 @@ let currentPage = 1;
 let sortCol = '';
 let sortAsc = true;
 const dataCache = {};
+let fetchController = null; // AbortController for cancelling in-flight fetches
 
 async function loadIndex() {
   const resp = await fetch('data/index.json');
@@ -312,18 +313,22 @@ async function loadIndex() {
   });
 }
 
-async function loadDiscipline(name) {
+async function loadDiscipline(name, signal) {
   if (dataCache[name]) return dataCache[name];
   const info = indexData.disciplines[name];
   if (!info) return [];
-  const resp = await fetch('data/' + info.file);
+  const resp = await fetch('data/' + info.file, signal ? { signal } : undefined);
   const data = await resp.json();
+  // Pre-compute lowercase search text for fast filtering
+  for (const r of data) {
+    r._search = [r['项目名称'], r['项目负责人'], r['工作单位'], r['项目批准号']].join(' ').toLowerCase();
+  }
   dataCache[name] = data;
   return data;
 }
 
-async function loadAllData() {
-  const promises = Object.keys(indexData.disciplines).map(d => loadDiscipline(d));
+async function loadAllData(signal) {
+  const promises = Object.keys(indexData.disciplines).map(d => loadDiscipline(d, signal));
   const results = await Promise.all(promises);
   return results.flat();
 }
@@ -368,23 +373,38 @@ async function applyFilters() {
   const year = document.getElementById('filterYear').value;
   const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
 
+  // Require at least one filter to avoid loading all 60 files
+  if (!disc && !cat && !year && !keyword) {
+    document.getElementById('tableBody').innerHTML = '<tr><td colspan="7" class="empty">请至少选择一个筛选条件（学科/类别/年份/关键词）</td></tr>';
+    document.getElementById('resultsInfo').textContent = `共 ${indexData.total.toLocaleString()} 条记录，请筛选查看`;
+    document.getElementById('pagination').innerHTML = '';
+    return;
+  }
+
+  // Cancel any previous in-flight fetches
+  if (fetchController) fetchController.abort();
+  fetchController = new AbortController();
+  const signal = fetchController.signal;
+
   document.getElementById('tableBody').innerHTML = '<tr><td colspan="7" class="loading"><div class="spinner"></div><br>正在加载数据...</td></tr>';
 
   let data;
-  if (disc) {
-    data = await loadDiscipline(disc);
-  } else if (cat || year || keyword) {
-    data = await loadAllData();
-  } else {
-    data = await loadAllData();
+  try {
+    if (disc) {
+      data = await loadDiscipline(disc, signal);
+    } else {
+      data = await loadAllData(signal);
+    }
+  } catch (e) {
+    if (e.name === 'AbortError') return; // Query was cancelled by a newer query
+    throw e;
   }
 
   filteredData = data.filter(r => {
     if (cat && r['项目类别'] !== cat) return false;
     if (year && getYear(r) !== year) return false;
     if (keyword) {
-      const text = [r['项目名称'], r['项目负责人'], r['工作单位'], r['项目批准号']].join(' ').toLowerCase();
-      if (!text.includes(keyword)) return false;
+      if (!r._search.includes(keyword)) return false;
     }
     return true;
   });
@@ -395,6 +415,7 @@ async function applyFilters() {
 }
 
 function resetFilters() {
+  if (fetchController) fetchController.abort();
   document.getElementById('filterDisc').value = '';
   document.getElementById('filterCat').value = '';
   document.getElementById('filterYear').value = '';
@@ -616,6 +637,8 @@ function toggleRecDisc(el) {
   }
 }
 
+let recAborted = false; // flag to cancel in-progress recommendation
+
 async function doRecommend() {
   const title = document.getElementById('recTitleInput').value.trim();
   const statusEl = document.getElementById('recStatus');
@@ -631,6 +654,11 @@ async function doRecommend() {
     resultsEl.innerHTML = '';
     return;
   }
+
+  // Abort any previous recommendation in progress
+  recAborted = true;
+  await new Promise(r => setTimeout(r, 0));
+  recAborted = false;
 
   statusEl.innerHTML = '<div class="spinner" style="width:20px;height:20px;border-width:2px;vertical-align:middle;margin-right:.5rem"></div>正在加载模型和检索相似课题...';
   resultsEl.innerHTML = '';
@@ -658,18 +686,31 @@ async function doRecommend() {
     }
   }
 
-  statusEl.innerHTML = `<div class="spinner" style="width:20px;height:20px;border-width:2px;vertical-align:middle;margin-right:.5rem"></div>正在检索 ${allTitles.length.toLocaleString()} 个已立项课题...`;
-
-  // Compute similarities (defer to avoid blocking UI)
-  await new Promise(r => setTimeout(r, 50));
-
+  // Chunked similarity computation to keep UI responsive
+  const CHUNK_SIZE = 2000;
+  const totalItems = allTitles.length;
   const scored = [];
-  for (const item of allTitles) {
-    const sim = cosineSim(queryVec, item.v);
-    if (sim > 0.05) {
-      scored.push({ ...item, score: sim });
+
+  for (let offset = 0; offset < totalItems; offset += CHUNK_SIZE) {
+    if (recAborted) return; // cancelled by a newer request
+
+    const end = Math.min(offset + CHUNK_SIZE, totalItems);
+    const pct = Math.round((end / totalItems) * 100);
+    statusEl.innerHTML = `<div class="spinner" style="width:20px;height:20px;border-width:2px;vertical-align:middle;margin-right:.5rem"></div>正在检索 ${totalItems.toLocaleString()} 个课题... ${pct}%`;
+
+    for (let j = offset; j < end; j++) {
+      const item = allTitles[j];
+      const sim = cosineSim(queryVec, item.v);
+      if (sim > 0.05) {
+        scored.push({ ...item, score: sim });
+      }
     }
+
+    // Yield to the browser between chunks
+    await new Promise(r => setTimeout(r, 0));
   }
+
+  if (recAborted) return;
 
   scored.sort((a, b) => b.score - a.score);
   const topN = scored.slice(0, 50);
@@ -701,6 +742,7 @@ async function doRecommend() {
 }
 
 function clearRecommend() {
+  recAborted = true;
   document.getElementById('recTitleInput').value = '';
   document.getElementById('recStatus').textContent = '';
   document.getElementById('recResults').innerHTML = '';
